@@ -1,0 +1,126 @@
+button {
+    background-color: rgb(255, 255, 156);
+    border: none;
+    font-size: 200%;
+}
+
+button:active {
+  background-color: yellow; 
+}
+
+#get {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+
+    width: 100%;
+    height: 100px;
+}
+
+.see {
+    display: inline-block;
+    position: relative;
+    font-size: 200%;
+    margin: 0px;
+
+    color: white;
+}
+
+#sees {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.success-flash {
+  animation: explodeFlash 1.5s ease-out forwards;
+}
+
+@keyframes explodeFlash {
+  0% {
+    /* 1. 누른 순간: 화면 전체가 눈부신 흰색+황금색 빛으로 가득 참 */
+    box-shadow: inset 0 0 0 2000px #ffffff, 
+                0 0 150px 2000px #fff8da;
+    /* 화면 전체를 순간적으로 밝게 탠지션 (빛 번짐 극대화) */
+    filter: brightness(2) saturate(1.5);
+  }
+  30% {
+    /* 2. 0.12초 시점: 황금빛이 가장 강렬하게 이글거리는 단계 */
+    box-shadow: inset 0 0 100px 2000px #ff9900, 
+                0 0 200px 2000px #fff8da;
+    filter: brightness(1.5);
+  }
+  100% {
+    /* 3. 0.4초 끝: 빛이 완전히 사방으로 걷히며 투명해짐 */
+    box-shadow: inset 0 0 0 0px transparent, 
+                0 0 0 0px transparent;
+    filter: brightness(1) saturate(1);
+  }
+}
+
+.hell-flash {
+  /* 2.5초 동안 아주 묵직하고 파괴적인 느낌으로 재생 */
+  animation: hellExplosion 2.5s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+}
+
+@keyframes hellExplosion {
+  0% {
+    /* 1. 누른 순간: 화면 전체가 순간적으로 칠흑 같은 암흑(지옥)으로 바뀜 */
+    box-shadow: inset 0 0 0 2000px #000000;
+    filter: brightness(0.5);
+  }
+  15% {
+    /* 2. 폭발 시작: 검은 화면 중앙을 찢고 핏빛 섬광과 타오르는 마그마색이 화면을 덮음 */
+    box-shadow: inset 0 0 150px 2000px #ff0033,
+                0 0 300px 2000px #ff3300;
+    filter: brightness(2) contrast(1.5) saturate(2);
+  }
+  40% {
+    /* 3. 폭발 절정: 불길이 사방으로 번지며 진한 검보라색과 저주받은 주황빛이 이글거림 */
+    box-shadow: inset 0 0 400px 2000px #1a0033,
+                0 0 500px 2000px #ff5500;
+    filter: brightness(1.3);
+  }
+  100% {
+    /* 4. 잔상 종료: 연기가 걷히듯 투명해지며 원래 화면으로 복구 */
+    box-shadow: inset 0 0 0 0px transparent,
+                0 0 0 0px transparent;
+    filter: brightness(1) contrast(1) saturate(1);
+  }
+}
+
+.heaven-flash {
+  /* 2.5초 동안 부드럽고 웅장하게 번져나가는 연출 */
+  animation: heavenGlow 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes heavenGlow {
+  0% {
+    /* 1. 누른 순간: 성스러운 백색 레이저가 화면 안팎을 가득 채움 */
+    box-shadow: inset 0 0 0 2000px #ffffff,
+                0 0 200px 2000px #ffffff;
+    filter: brightness(2.5) blur(2px); /* 약간의 블러로 몽환적인 느낌 추가 */
+  }
+  25% {
+    /* 2. 축복 단계: 빛이 부드러워지며 분홍빛과 하늘빛 오로라가 화면 전체에 감돎 */
+    box-shadow: inset 0 0 300px 2000px #ffdef2,
+                0 0 400px 2000px #d0e7ff;
+    filter: brightness(1.5) blur(0px);
+  }
+  60% {
+    /* 3. 잔상 유지: 은은한 샴페인 골드빛과 에메랄드빛이 감돌며 신비로운 분위기 유지 */
+    box-shadow: inset 0 0 500px 2000px #fff9e6,
+                0 0 600px 2000px #e1fff2;
+    filter: brightness(1.2);
+  }
+  100% {
+    /* 4. 정화 완료: 빛이 하늘로 승천하듯 사라지며 원상복구 */
+    box-shadow: inset 0 0 0 0px transparent,
+                0 0 0 0px transparent;
+    filter: brightness(1);
+  }
+}
+
+.hidden {
+  display: none !important; /* 화면에서 아예 공간까지 안 보이게 삭제 */
+}
