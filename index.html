@@ -20,7 +20,7 @@
     
     <button id="get" class="repeat">째매씨 뽑기</button>
 
-    <p style="font-size: 200%; color: gray;">ver 2.0.0</p>
+    <p style="font-size: 200%; color: gray;">ver 2.1.0</p>
     <script>
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -59,7 +59,7 @@
 
 
             if(luckedRand(50, 100)){
-                if (luckedRand(100, 100000000000)) {
+                if (luckedRand((1 * 100), (100000 * 100))) {
                     btn1.disabled = true;
 
                     void btn1.offsetWidth;
@@ -72,9 +72,9 @@
 
                     btn1.disabled = false;
                     p1.textContent = "우주의 째매씨";
-                    p2.textContent = "1/100억";
-                    gold += 1000000;
-                } else if(luckedRand(100, 1000000000)) {
+                    p2.textContent = "1/10만";
+                    gold += 100000;
+                } else if(luckedRand((1 * 100), (10000 * 100))) {
                     btn1.disabled = true;
 
                     void btn1.offsetWidth;
@@ -85,8 +85,8 @@
 
                     btn1.disabled = false;
                     p1.textContent = "신 째매씨";
-                    p2.textContent = "1/1억";
-                    gold += 100000;
+                    p2.textContent = "1/10000";
+                    gold += 10000;
                 } else if(luckedRand(4, 15540)) {
                     btn1.disabled = true;
 
@@ -113,7 +113,7 @@
                     p1.textContent = "대악마 째매씨";
                     p2.textContent = "1/4444";
                     gold += 4444;
-                } else if(luckedRand(100, 10000)) {
+                } else if(luckedRand(100, 100000)) {
                     btn1.disabled = true;
 
                     void btn1.offsetWidth;
@@ -122,9 +122,13 @@
                     await wait(1500);
 
                     btn1.disabled = false;
+                    p1.textContent = "개커요 째매씨";
+                    p2.textContent = "1/1000";
+                    gold += 1000;
+                } else if(luckedRand(100, 10000)) {
                     p1.textContent = "LARGE 째매씨";
                     p2.textContent = "1/100";
-                    gold += 1000;
+                    gold += 500;
                 } else if(luckedRand(100, 1000)) {
                     p1.textContent = "BIG 째매씨";
                     p2.textContent = "1/10";
