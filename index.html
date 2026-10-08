@@ -15,37 +15,23 @@
         <p id="chance"></p>
         <p id="result"></p>
     </div>
-    <button id="upgrade">운 업그레이드(1000G)</button>
+    <button onclick="confirmReset()">데이터 초기화하기</button>
+    <button id="upgrade" class="repeat">운 업그레이드(0G)</button>
     
-    <button id="get">째매씨 뽑기</button>
+    <button id="get" class="repeat">째매씨 뽑기</button>
+
+    <p style="font-size: 200%; color: gray;">ver 2.0.0</p>
     <script>
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        let gold = 0;
-        let luck = 0;
-        const luckupgrade = [
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            2000,
-            2000,
-            2000,
-            2000,
-            2000,
-            3000,
-            3000,
-            3000,
-            3000,
-            3000,
-            4000,
-            4000,
-            4000,
-            4000,
-            4000,
-            5000
-        ]
+        let gold = Number(localStorage.getItem('gold'));
+        let luck = Number(localStorage.getItem('luck'));
+        if(!gold){
+            gold = 0;
+        }
+        if(!luck){
+            luck = 0;
+        }
         
         const btn1 = document.getElementById('get');
         const btn2 = document.getElementById('upgrade');
@@ -53,6 +39,10 @@
         const p2 = document.getElementById('chance');
         const see1 = document.getElementById('see1');
         const see2 = document.getElementById('see2');
+
+        see1.textContent = `${gold}G`;
+        see2.textContent = `+${luck}% luck`;
+        btn2.textContent = `운 업그레이드(${(luck + 1) * 1000}G)`;
 
         function luckedRand(randN, maxN){
             var rand = Math.floor(Math.random() * maxN) + 1;
@@ -65,12 +55,41 @@
         }
 
         btn1.addEventListener('click', async() => {
+            btn1.className = 'repeat';
+
 
             if(luckedRand(50, 100)){
-                if(luckedRand(1, 3885)) {
+                if (luckedRand(100, 100000000000)) {
                     btn1.disabled = true;
 
-                    btn1.className = '';
+                    void btn1.offsetWidth;
+                    btn1.classList.add('cosmic-flash'); 
+                    play2SecFadeOut("heaven.mp3")
+                    await wait(500);
+                    play2SecFadeOut("hell.mp3")
+
+                    await wait(2500);
+
+                    btn1.disabled = false;
+                    p1.textContent = "우주의 째매씨";
+                    p2.textContent = "1/100억";
+                    gold += 1000000;
+                } else if(luckedRand(100, 1000000000)) {
+                    btn1.disabled = true;
+
+                    void btn1.offsetWidth;
+                    btn1.classList.add('god-flash'); 
+                    play2SecFadeOut("heaven.mp3")
+
+                    await wait(3000);
+
+                    btn1.disabled = false;
+                    p1.textContent = "신 째매씨";
+                    p2.textContent = "1/1억";
+                    gold += 100000;
+                } else if(luckedRand(4, 15540)) {
+                    btn1.disabled = true;
+
                     void btn1.offsetWidth;
                     btn1.classList.add('heaven-flash'); 
                     play2SecFadeOut("heaven.mp3")
@@ -81,10 +100,9 @@
                     p1.textContent = "대천사 째매씨";
                     p2.textContent = "1/7770";
                     gold += 7777;
-                } else if(luckedRand(1, 2222)) {
+                } else if(luckedRand(4, 8888)) {
                     btn1.disabled = true;
 
-                    btn1.className = '';
                     void btn1.offsetWidth;
                     btn1.classList.add('hell-flash'); 
                     play2SecFadeOut("hell.mp3")
@@ -95,22 +113,25 @@
                     p1.textContent = "대악마 째매씨";
                     p2.textContent = "1/4444";
                     gold += 4444;
-                } else if(luckedRand(20, 100)) {
+                } else if(luckedRand(100, 10000)) {
                     btn1.disabled = true;
 
-                    btn1.className = '';
                     void btn1.offsetWidth;
                     btn1.classList.add('success-flash');
 
                     await wait(1500);
 
                     btn1.disabled = false;
+                    p1.textContent = "LARGE 째매씨";
+                    p2.textContent = "1/100";
+                    gold += 1000;
+                } else if(luckedRand(100, 1000)) {
                     p1.textContent = "BIG 째매씨";
                     p2.textContent = "1/10";
                     gold += 100;
                 } else {
                     p1.textContent = "일반 째매씨";
-                    p2.textContent = "2/5";
+                    p2.textContent = "업뎃마다바뀜";
                     gold += 10;
                 }
                 
@@ -124,19 +145,12 @@
         });
 
         btn2.addEventListener('click', async() => {
-            var luckG = 0;
-            var nextG = 0;
-            if (luckupgrade[luck] !== undefined) {
-                luckG = luckupgrade[luck];
-                nextG = luckupgrade[luck];
-                if (!nextG) nextG = 5000;
-            } else {
-                luckG = 5000;
-                nextG = 5000;
-            }
+            var luckG = luck * 1000;
+            var nextG = (luck + 1) * 1000;
+            luckG = luck * 1000;
+            nextG
 
             if(luckG > gold) {
-                alert('골드가 부족합니다.');
                 return;
             }
 
@@ -168,6 +182,65 @@
                 }
             }, stepTime);
         }
+
+        const saveData = () => {
+            localStorage.setItem('gold', gold);
+            localStorage.setItem('luck', luck);
+        };
+
+        // PC & 일반 브라우저
+        window.addEventListener('beforeunload', saveData);
+
+        // 모바일 Safari 및 백그라운드 전환 대응
+        window.addEventListener('pagehide', saveData);
+
+        function confirmReset() {
+            // 선택창(확인/취소) 표시
+            const isConfirmed = confirm("정말로 모든 데이터를 초기화하시겠습니까?\n이 작업은 복구할 수 없습니다.");
+
+            // '확인(예)'을 누른 경우에만 실행
+            if (isConfirmed) {
+                gold = 0;
+                luck = 0;
+                localStorage.clear(); // 로컬스토리지 전체 삭제
+                location.reload();    // 페이지 새로고침
+            }
+        }
+    </script>
+    <script>
+        (function () {
+            let timer = null;
+            let interval = null;
+
+            function start(e) {
+                // 1. 클릭된 요소나 그 상위 요소 중 'repeat' 클래스를 가졌는지 확인
+                const target = e.target.closest('.repeat');
+                if (!target) return;
+
+                if (e.type === 'touchstart') e.preventDefault();
+
+                // 2. 누르는 즉시 첫 클릭 발생
+                target.click();
+
+                // 3. 0.25초 이상 꾹 누르고 있으면 0.1초(100ms)마다 연속 클릭
+                timer = setTimeout(() => {
+                    interval = setInterval(() => target.click(), 100);
+                }, 250);
+            }
+
+            function stop() {
+                clearTimeout(timer);
+                clearInterval(interval);
+            }
+
+            document.addEventListener('touchstart', start, { passive: false });
+            document.addEventListener('touchend', stop);
+            document.addEventListener('touchcancel', stop);
+
+            document.addEventListener('mousedown', start);
+            document.addEventListener('mouseup', stop);
+            document.addEventListener('mouseleave', stop);
+        })();
     </script>
 </body>
 </html>
