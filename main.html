@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>째매씨 뽑기!</title>
+    <link rel="stylesheet" href="mainStyle.css">
+</head>
+<body id="screen" style="background-color: black;">
+    <div id="sees">
+        <p class="see" id="see1">0G</p>
+        <p class="see" id="see2">+0% luck</p>
+    </div>
+    <div id="resultdiv">
+        <p id="chance"></p>
+        <p id="result"></p>
+    </div>
+    <button id="upgrade">운 업그레이드(1000G)</button>
+    
+    <button id="get">째매씨 뽑기</button>
+    <script>
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        let gold = 0;
+        let luck = 0;
+        const luckupgrade = [
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            3000,
+            3000,
+            3000,
+            3000,
+            3000,
+            4000,
+            4000,
+            4000,
+            4000,
+            4000,
+            5000
+        ]
+        
+        const btn1 = document.getElementById('get');
+        const btn2 = document.getElementById('upgrade');
+        const p1 = document.getElementById('result');
+        const p2 = document.getElementById('chance');
+        const see1 = document.getElementById('see1');
+        const see2 = document.getElementById('see2');
+
+        function luckedRand(randN, maxN){
+            var rand = Math.floor(Math.random() * maxN) + 1;
+
+            if (rand <= (randN + luck)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        btn1.addEventListener('click', async() => {
+
+            if(luckedRand(50, 100)){
+                if(luckedRand(1, 3885)) {
+                    btn1.disabled = true;
+
+                    btn1.className = '';
+                    void btn1.offsetWidth;
+                    btn1.classList.add('heaven-flash'); 
+                    play2SecFadeOut("heaven.mp3")
+
+                    await wait(2500);
+
+                    btn1.disabled = false;
+                    p1.textContent = "대천사 째매씨";
+                    p2.textContent = "1/7770";
+                    gold += 7777;
+                } else if(luckedRand(1, 2222)) {
+                    btn1.disabled = true;
+
+                    btn1.className = '';
+                    void btn1.offsetWidth;
+                    btn1.classList.add('hell-flash'); 
+                    play2SecFadeOut("hell.mp3")
+
+                    await wait(2500);
+
+                    btn1.disabled = false;
+                    p1.textContent = "대악마 째매씨";
+                    p2.textContent = "1/4444";
+                    gold += 4444;
+                } else if(luckedRand(20, 100)) {
+                    btn1.disabled = true;
+
+                    btn1.className = '';
+                    void btn1.offsetWidth;
+                    btn1.classList.add('success-flash');
+
+                    await wait(1500);
+
+                    btn1.disabled = false;
+                    p1.textContent = "BIG 째매씨";
+                    p2.textContent = "1/10";
+                    gold += 100;
+                } else {
+                    p1.textContent = "일반 째매씨";
+                    p2.textContent = "2/5";
+                    gold += 10;
+                }
+                
+            } else {
+                p1.textContent = "꽝!";
+                p2.textContent = "1/2";
+                gold += 1;
+            }
+            see1.textContent = `${gold}G`;
+            see2.textContent = `+${luck}% luck`;
+        });
+
+        btn2.addEventListener('click', async() => {
+            var luckG = 0;
+            var nextG = 0;
+            if (luckupgrade[luck] !== undefined) {
+                luckG = luckupgrade[luck];
+                nextG = luckupgrade[luck];
+                if (!nextG) nextG = 5000;
+            } else {
+                luckG = 5000;
+                nextG = 5000;
+            }
+
+            if(luckG > gold) {
+                alert('골드가 부족합니다.');
+                return;
+            }
+
+            luck += 1;
+            gold -= luckG;
+
+            btn2.textContent = `운 업그레이드(${nextG}G)`;
+            see1.textContent = `${gold}G`;
+            see2.textContent = `+${luck}% luck`;
+        });
+
+        function play2SecFadeOut(filePath) {
+            const audio = new Audio(filePath);
+            const fadeDuration = 2000; // 총 재생 및 페이드 아웃 시간 (2000ms = 2초)
+            const stepTime = 50;       // 0.05초마다 볼륨 조절 (부드럽게 감소)
+  
+            audio.volume = 1.0;
+            audio.play();
+
+            const totalSteps = fadeDuration / stepTime; // 총 40단계에 걸쳐 줄어듬
+            const volumeStep = 1.0 / totalSteps;        // 한 단계당 0.025씩 감소
+
+            const fadeInterval = setInterval(() => {
+                if (audio.volume > volumeStep) {
+                    audio.volume -= volumeStep;
+                } else {
+                    clearInterval(fadeInterval);
+                    audio.pause();
+                }
+            }, stepTime);
+        }
+    </script>
+</body>
+</html>
