@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>누가누가 오더 잘하나</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="screen center">
+    <h1>오더 잘하기!</h1>
+    <button></button>
+    <button></button>
+    <div id="replayContainer"></div>
+    <script>
+        const cleanAllChat = (root = document) => {
+    // 1. 플레이어 닉네임을 1픽~8픽으로 매핑
+    const playerMap = new Map();
+
+    document.querySelectorAll("#user-table .item .nick-name")
+        .forEach((el, index) => {
+            const nickname = el.textContent.trim();
+
+            if (nickname && index < 8) {
+                playerMap.set(nickname, `${index + 1}픽`);
+            }
+        });
+
+    // 2. 일반 채팅 닉네임 변경
+    document.querySelectorAll(".chat-data-container .nick-name")
+        .forEach(el => {
+            const nickname = el.textContent.trim();
+
+            if (playerMap.has(nickname)) {
+                el.textContent = playerMap.get(nickname);
+            }
+        });
+
+    // 3. 밀서의 보내는 사람·받는 사람 닉네임 변경
+    document.querySelectorAll(
+        ".secret-letter .to, .secret-letter .from"
+    ).forEach(el => {
+        let text = el.textContent;
+
+        for (const [nickname, pick] of playerMap) {
+            text = text.replaceAll(nickname, pick);
+        }
+
+        el.textContent = text;
+    });
+
+    // 4. 마피아챗과 고스트챗 숨기기
+    document.querySelectorAll(
+        ".chat-bubble.MAFIACHAT, .chat-bubble.GHOSTCHAT"
+    ).forEach(el => {
+        const container = el.closest(".chat-data-container");
+        (container || el).style.setProperty(
+            "display", "none", "important"
+        );
+    });
+
+    // 5. 밀서 숨기기
+    document.querySelectorAll(
+        ".secret-letter, .secret-letter-container, " +
+        ".chat-bubble.SECRETLETTER"
+    ).forEach(el => {
+        el.style.setProperty("display", "none", "important");
+    });
+
+    document.querySelectorAll(".chat-data-container").forEach(container => {
+        if (/밀서/.test(container.innerText)) {
+            container.style.setProperty("display", "none", "important");
+        }
+    });
+
+    // 6. 직업 아이콘과 프레임 이미지 숨기기
+    document.querySelectorAll(".job-icon-img, .frame-img")
+        .forEach(el => {
+            el.style.setProperty("display", "none", "important");
+        });
+
+    // 7. 프로필 장식 제거
+    document.querySelectorAll(".profile-container").forEach(el => {
+        el.style.setProperty("background", "none", "important");
+        el.style.setProperty("border", "none", "important");
+        el.style.setProperty("box-shadow", "none", "important");
+    });
+
+    // 8. 투표 찬성·반대 및 플레이어 간 투표 메시지 숨기기
+    document.querySelectorAll(".system.center").forEach(el => {
+        const text = el.textContent.trim();
+
+        if (
+            /^\d+\s*님이 투표를 (?:찬성|반대)하였습니다\.?$/.test(text) ||
+            /^\d+\s*님이 \d+\s*님에게 투표하였습니다\.?$/.test(text)
+        ) {
+            el.style.setProperty("display", "none", "important");
+        }
+    });
+
+    // 9. 두 번째 살해 메시지부터 이후의 모든 메시지 숨기기
+    const allMessages = Array.from(
+        document.querySelectorAll(
+            ".chat-data-container, .system.center"
+        )
+    );
+
+    let murderCount = 0;
+    let hideAfterSecondMurder = false;
+
+    for (const el of allMessages) {
+        const text = el.textContent.trim();
+
+        const isMurderMessage =
+            /^\d+\s*님이 살해당하였습니다\.?$/.test(text) ||
+            /^.+님이 살해당하였습니다\.?$/.test(text);
+
+        if (isMurderMessage) {
+            murderCount++;
+
+            if (murderCount === 2) {
+                hideAfterSecondMurder = true;
+            }
+        }
+
+        if (hideAfterSecondMurder) {
+            el.style.setProperty("display", "none", "important");
+        }
+    }
+};
+    </script>
+    <script>
+        const replayURL =
+    "https://o2zj8uijbj.execute-api.ap-northeast-2.amazonaws.com/GetMafiaChat?id=e9305daf968ebb7adccb5614f49e42f3&lang=kr";
+
+let replayDocument;
+
+async function loadReplay() {
+    const response = await fetch(replayURL);
+
+    if (!response.ok) {
+        throw new Error("리플레이 불러오기 실패");
+    }
+
+    const html = await response.text();
+
+    const parser = new DOMParser();
+
+    replayDocument = parser.parseFromString(
+        html,
+        "text/html"
+    );
+
+    cleanAllChat(replayDocument);
+
+    document.querySelector("#replayContainer").replaceChildren(
+        ...replayDocument.body.childNodes
+    );
+}
+
+loadReplay();
+    </script>
+</body>
