@@ -164,7 +164,7 @@ async function loadReplay(replayId) {
         const replayDoc = new DOMParser().parseFromString(html, 'text/html');
 
         // 기존에 만든 채팅 정리 함수가 있다면 실행
-        cleanAllChat();
+        cleanAllChat(replayDoc);
 
         // iframe을 만들어 ingameReplay 안에 표시
         const iframe = document.createElement('iframe');
