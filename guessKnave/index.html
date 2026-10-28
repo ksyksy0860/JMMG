@@ -255,7 +255,7 @@ async function loadReplay(replayId) {
             
             const ids = await response.json();
 
-            const randarr = ids.filter(item => item.rp >= minValue && item.rp <= maxValue);
+            const randarr = ids.filter(item => item.rp >= minin.value && item.rp <= maxin.value);
 
             if (randarr.length > 0) {
                 const randomIndex = Math.floor(Math.random() * randarr.length);
