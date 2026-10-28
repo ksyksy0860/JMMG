@@ -251,9 +251,11 @@ async function loadReplay(replayId) {
         const return2B = document.getElementById('return2B');
 
         startB.addEventListener('click', async () => {
-            const ids = await fetch('./ids.json');
+            const response = await fetch('./ids.json');
             
-            const randarr = ids.filter(item => item.rp >= minin.value && item.rp <= maxin.value);
+            const ids = await response.json();
+
+            const randarr = ids.filter(item => item.rp >= minValue && item.rp <= maxValue);
 
             if (randarr.length > 0) {
                 const randomIndex = Math.floor(Math.random() * randarr.length);
