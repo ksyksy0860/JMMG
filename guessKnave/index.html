@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>누가누가 오더 잘하나</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="screen center">
+    <div id="mainScene" class="scene active">
+        <h1>누가누가 오더 잘하나?</h1>
+        <label>최소 rp:</label>
+        <input id="minin" type="range" min="0" max="10000" step="100" value="0" oninput="minout.value = this.value">
+        <br>
+        <output id="minout">0</output>
+        <br><br><br>
+        <label>최대 rp:</label>
+        <input id="maxin" type="range" min="0" max="10000" step="100" value="10000" oninput="maxout.value = this.value">
+        <br>
+        <output id="maxout">10000</output>
+        <br>
+        <button id="startB">게임 시작</button>
+        <button id="tutorialB">튜토리얼</button>
+        <!--<div id="ingameReplay"></div>-->
+    </div>
+    <div id="tutorial" class="scene">
+        <button id="returnB">돌아가기</button>
+        <h1>튜 토 리 얼</h1>
+        <p>- 말 그대로 악인 세마리 다맞추는 게임입니다.</p>
+        <p>- 리플 나오는거 보고 맞추면 됩니다.</p>
+        <p>- rp는 등록일 기준 가장 rp 낮은 유저 기준입니다.</p>
+        <p>- 밀서와 누가 누구를 투표했는지, 찬반, 밤챗, 죽은애챗, 닉네임은 비공개 처리됩니다.</p>
+    </div>
+    <div id="ingameScene" class="scene">
+        평알:
+        <p id="rps">-</p>
+        <div id="ingameReplay"></div>
+        <div>
+            <label><input type="checkbox" name="fruit" value="1"> 1픽</label>
+            <label><input type="checkbox" name="fruit" value="2"> 2픽</label>
+            <label><input type="checkbox" name="fruit" value="3"> 3픽</label>
+            <label><input type="checkbox" name="fruit" value="4"> 4픽</label>
+            <br>
+            <label><input type="checkbox" name="fruit" value="5"> 5픽</label>
+            <label><input type="checkbox" name="fruit" value="6"> 6픽</label>
+            <label><input type="checkbox" name="fruit" value="7"> 7픽</label>
+            <label><input type="checkbox" name="fruit" value="8"> 8픽</label>
+        </div>
+        <button id="endB">결과 보기</button>
+    </div>
+    <div id="end" class="scene">
+        <h1 id="resulth">당신이 맞춘 악인 수는 -명입니다!</h1>
+        <p id="resultp">악인은 -, -, -였어요!</p>
+        <button id="return2B">메인으로 돌아가기</button>
+    </div>
+    <script>
+        const cleanAllChat = (root = document) => {
+    // 1. 플레이어 닉네임을 1픽~8픽으로 매핑
+    const playerMap = new Map();
+
+    root.querySelectorAll("#user-table .item .nick-name")
+        .forEach((el, index) => {
+            const nickname = el.textContent.trim();
+
+            if (nickname && index < 8) {
+                playerMap.set(nickname, `${index + 1}픽`);
+            }
+        });
+
+    // 2. 일반 채팅 닉네임 변경
+    root.querySelectorAll(".chat-data-container .nick-name")
+        .forEach(el => {
+            const nickname = el.textContent.trim();
+
+            if (playerMap.has(nickname)) {
+                el.textContent = playerMap.get(nickname);
+            }
+        });
+
+    // 3. 밀서의 보내는 사람·받는 사람 닉네임 변경
+    root.querySelectorAll(
+        ".secret-letter .to, .secret-letter .from"
+    ).forEach(el => {
+        let text = el.textContent;
+
+        for (const [nickname, pick] of playerMap) {
+            text = text.replaceAll(nickname, pick);
+        }
+
+        el.textContent = text;
+    });
+
+    // 4. 마피아챗과 고스트챗 숨기기
+    root.querySelectorAll(
+        ".chat-bubble.MAFIACHAT, .chat-bubble.GHOSTCHAT"
+    ).forEach(el => {
+        const container = el.closest(".chat-data-container");
+
+        (container || el).style.setProperty(
+            "display",
+            "none",
+            "important"
+        );
+    });
+
+    // 5. 밀서 숨기기
+    root.querySelectorAll(
+        ".secret-letter, .secret-letter-container, " +
+        ".chat-bubble.SECRETLETTER"
+    ).forEach(el => {
+        el.style.setProperty("display", "none", "important");
+    });
+
+    root.querySelectorAll(".chat-data-container")
+        .forEach(container => {
+            if (/밀서/.test(container.innerText)) {
+                container.style.setProperty(
+                    "display",
+                    "none",
+                    "important"
+                );
+            }
+        });
+
+    // 6. 직업 아이콘과 프레임 이미지 숨기기
+    root.querySelectorAll(".job-icon-img, .frame-img")
+        .forEach(el => {
+            el.style.setProperty("display", "none", "important");
+        });
+
+    // 7. 프로필 장식 제거
+    root.querySelectorAll(".profile-container")
+        .forEach(el => {
+            el.style.setProperty("background", "none", "important");
+            el.style.setProperty("border", "none", "important");
+            el.style.setProperty("box-shadow", "none", "important");
+        });
+
+    // 8. 투표 찬성·반대 및 플레이어 간 투표 메시지 숨기기
+    root.querySelectorAll(".system.center")
+        .forEach(el => {
+            const text = el.textContent.trim();
+
+            if (
+                /^\d+\s*님이 투표를 (?:찬성|반대)하였습니다\.?$/.test(text) ||
+                /^\d+\s*님이 \d+\s*님에게 투표하였습니다\.?$/.test(text)
+            ) {
+                el.style.setProperty("display", "none", "important");
+            }
+        });
+
+    // 9. 두 번째 살해 메시지부터 이후의 모든 메시지 숨기기
+    const allMessages = Array.from(
+        root.querySelectorAll(
+            ".chat-data-container, .system.center"
+        )
+    );
+
+    let murderCount = 0;
+    let hideAfterSecondMurder = false;
+
+    for (const el of allMessages) {
+        const text = el.textContent.trim();
+
+        const isMurderMessage =
+            /^.+님이 살해당하였습니다\.?$/.test(text);
+
+        if (isMurderMessage) {
+            murderCount++;
+
+            if (murderCount === 2) {
+                hideAfterSecondMurder = true;
+            }
+        }
+
+        if (hideAfterSecondMurder) {
+            el.style.setProperty("display", "none", "important");
+        }
+    }
+};
+    </script>
+    <script>
+        const replayURL =
+    "https://o2zj8uijbj.execute-api.ap-northeast-2.amazonaws.com/GetMafiaChat?id=e9305daf968ebb7adccb5614f49e42f3&lang=kr";
+    </script>
+    <script>
+const WORKER_URL = 'https://mafia42.kholyy7.workers.dev';
+
+// 리플레이 ID를 넣으면 자동으로 불러오기
+async function loadReplay(replayId) {
+    const replayBox = document.getElementById('ingameReplay');
+
+    replayBox.innerHTML = '리플레이 불러오는 중...';
+
+    try {
+        const response = await fetch(
+            `${WORKER_URL}/?id=${encodeURIComponent(replayId)}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const html = await response.text();
+
+        // 리플레이 HTML 파싱
+        const replayDoc = new DOMParser().parseFromString(html, 'text/html');
+
+        // 기존에 만든 채팅 정리 함수가 있다면 실행
+        cleanAllChat(replayDoc);
+
+        // iframe을 만들어 ingameReplay 안에 표시
+        const iframe = document.createElement('iframe');
+
+        iframe.style.width = '100%';
+        iframe.style.height = '700px';
+        iframe.style.border = 'none';
+
+        iframe.srcdoc = replayDoc.documentElement.outerHTML;
+
+        replayBox.innerHTML = '';
+        replayBox.appendChild(iframe);
+
+    } catch (error) {
+        console.error(error);
+        replayBox.textContent = '리플레이를 불러오지 못했습니다.';
+    }
+}
+
+// 사용 예시
+// loadReplay('e9305daf968ebb7adccb5614f49e42f3');
+    </script>
+    <script>
+        const mainScene = document.getElementById('mainScene');
+        const minin = document.getElementById('minin');
+        const maxin = document.getElementById('maxin');
+        const startB = document.getElementById('startB');
+        const tutorialB = document.getElementById('tutorialB');
+
+        const tutorial = document.getElementById('tutorial');
+        const returnB = document.getElementById('returnB');
+
+        let randomItem;
+
+        const ingameScene = document.getElementById('ingameScene');
+        const rps = document.getElementById('rps');
+        const endB = document.getElementById('endB');
+
+        const end = document.getElementById('end');
+        const resulth = document.getElementById('resulth');
+        const resultp = document.getElementById('resultp');
+        const return2B = document.getElementById('return2B');
+
+        startB.addEventListener('click', async () => {
+            const ids = await fetch('./ids.json');
+            
+            const randarr = ids.filter(item => item.rp >= minin.value && item.rp <= maxin.value);
+
+            if (randarr.length > 0) {
+                const randomIndex = Math.floor(Math.random() * randarr.length);
+                randomItem = randarr[randomIndex];
+
+                mainScene.classList.remove('active');
+                ingameScene.classList.add('active');
+
+                loadReplay(randomItem.id);
+                rps.textContent = randomItem.rp;
+            } else {
+                alert('그 점수대 리플이 없어요.');
+            }
+        });
+        tutorialB.addEventListener('click', () => {
+            mainScene.classList.remove('active');
+            tutorial.classList.add('active');
+        });
+
+        returnB.addEventListener('click', () => {
+            mainScene.classList.add('active');
+            tutorial.classList.remove('active');
+        });
+
+        function getSelected() {
+  // 1. 체크된 체크박스만 선택
+  const selectedCheckboxes = document.querySelectorAll('input[name="fruit"]:checked');
+  
+  const values = [];
+  selectedCheckboxes.forEach((checkbox) => {
+    values.push(checkbox.value);
+  });
+
+  return values;
+}
+        function countExactMatches(Aarr, Barr) {
+            // item은 Aarr의 값, index는 현재 위치(0, 1, 2...)를 뜻합니다.
+            return Aarr.filter((item, index) => item === Barr[index]).length;
+        }
+
+        endB.addEventListener('click', () => {
+            if(getSelected().length === 3) {
+                const selected = getSelected();
+
+                ingameScene.classList.remove('active');
+                end.classList.add('active');
+
+                resulth.textContent = `당신이 맞춘 악인 수는 ${countExactMatches(randomItem.Knave, selected)}명입니다!`;
+                resultp.textContent = `악인은 ${randomItem.Knave[0]}픽, ${randomItem.Knave[1]}픽, ${randomItem.Knave[2]}픽이였어요!`
+            } else {
+                alert('악인은 꼭 세 명만 선택해주세요!');
+            }
+        });
+        return2B.addEventListener('click', () => {
+            end.classList.remove('active');
+            mainScene.classList.add('active');
+        })
+    </script>
+</body>
